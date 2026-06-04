@@ -43,7 +43,7 @@ textarea{width:100%;min-height:150px;resize:vertical}
 </header>
 <main>
   <div class="notice">
-    <strong>How to use this dashboard:</strong> Select one or more data points in the chart, or use the filters to narrow the view. The Narrative Builder will generate a grant-ready paragraph based on what you choose.
+    <strong>How to use this dashboard:</strong> Select one or more data points in the chart, or use the filters to narrow the view. The Why AP Is Needed section helps you turn selected data into a short plain-language summary of the need. It highlights the most important points so funders, partners, and families can quickly understand the current evidence.
   </div>
   <div class="grid">
     <div class="card">
@@ -56,14 +56,14 @@ textarea{width:100%;min-height:150px;resize:vertical}
       <small>Tip: hold Ctrl/Command to select more than one item in the filters.</small>
     </div>
     <div class="card">
-      <h2 style="margin:0 0 10px;font-size:20px;">Narrative Builder</h2>
+      <h2 style="margin:0 0 10px;font-size:20px;">Why AP Is Needed</h2>
       <div class="controls">
-        <button onclick="generateNarrative()">Generate paragraph</button>
-        <button class="secondary" onclick="copyNarrative()">Copy to clipboard</button>
+        <button onclick="generateNarrative()">Summarize</button>
+        <button class="secondary" onclick="copyNarrative()">Copy text</button>
       </div>
-      <textarea id="narrative" placeholder="Select data points and click Generate paragraph."></textarea>
+      <textarea id="narrative" placeholder="Select data points and click Summarize."></textarea>
       <div class="pills" id="selectedPills"></div>
-      <div class="small" style="margin-top:10px;">Suggested use: paste the paragraph into a grant narrative, board deck, or report.</div>
+      <div class="small" style="margin-top:10px;">Suggested use: paste the summary into a memo, board deck, or report.</div>
     </div>
   </div>
 
