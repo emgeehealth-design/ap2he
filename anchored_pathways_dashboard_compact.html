@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Anchored Pathways Evidence Dashboard</title>
+<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+<style>
+:root{--bg:#F5F5F5;--card:#FFFFFF;--ink:#1D4331;--muted:#5b6b63;--brand:#1D4331;--accent:#ECBA69;--line:#D8E6C8;}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--brand);color:#fff;padding:18px 18px}
+header h1{margin:0 0 6px;font-size:24px}
+header p{margin:0;max-width:980px;line-height:1.45}
+main{padding:14px 14px 20px;max-width:1200px;margin:0 auto}
+.notice{background:#FFFFFF;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:16px;line-height:1.5}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:12px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.05);padding:14px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+select,button,textarea{font-size:14px;border-radius:10px;border:1px solid #cbd5e1;padding:10px}
+select{min-width:180px}
+button{background:var(--accent);color:#1D4331;border:none;cursor:pointer}
+button.secondary{background:#e5e7eb;color:#1D4331}
+#chart{height:460px}
+small,.small{color:var(--muted);font-size:12px;line-height:1.45}
+textarea{width:100%;min-height:150px;resize:vertical}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.pill{background:#E5F2D2;color:#1D4331;padding:6px 10px;border-radius:999px;font-size:12px}
+.source{display:block;font-size:12px;margin-top:6px}
+.item{padding:10px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:none;padding-top:0}
+.item h3{margin:0 0 8px;font-size:18px;color:#1D4331}
+.label{display:inline-block;background:#E5F2D2;color:#1D4331;padding:4px 8px;border-radius:999px;font-size:12px;margin-bottom:8px}
+.metric{font-weight:700;font-size:18px}
+.linklist a{word-break:break-word}
+@media (max-width: 1000px){.grid{grid-template-columns:1fr}#chart{height:480px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Anchored Pathways Evidence Dashboard</h1>
+  <p>Current 2025–2026 data on Texas college access, persistence, transfer, and workforce outcomes. Each point includes a plain-language explanation and a source link so users can check the original evidence.</p>
+</header>
+<main>
+  <div class="notice">
+    <strong>How to use this dashboard:</strong> Select one or more data points in the chart, or use the filters to narrow the view. The Narrative Builder will generate a grant-ready paragraph based on what you choose.
+  </div>
+  <div class="grid">
+    <div class="card">
+      <div class="controls">
+        <select id="demoFilter" multiple size="4" title="Filter by student demographics"></select>
+        <select id="outcomeFilter" multiple size="4" title="Filter by outcomes"></select>
+        <button onclick="clearFilters()">Clear filters</button>
+      </div>
+      <div id="chart"></div>
+      <small>Tip: hold Ctrl/Command to select more than one item in the filters.</small>
+    </div>
+    <div class="card">
+      <h2 style="margin:0 0 10px;font-size:20px;">Narrative Builder</h2>
+      <div class="controls">
+        <button onclick="generateNarrative()">Generate paragraph</button>
+        <button class="secondary" onclick="copyNarrative()">Copy to clipboard</button>
+      </div>
+      <textarea id="narrative" placeholder="Select data points and click Generate paragraph."></textarea>
+      <div class="pills" id="selectedPills"></div>
+      <div class="small" style="margin-top:10px;">Suggested use: paste the paragraph into a grant narrative, board deck, or report.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h2 style="margin:0 0 10px;font-size:20px;">Source-linked evidence</h2>
+    <div id="evidenceList"></div>
+  </div>
+</main>
+<script>
+const data = [
+  {
+    id:'dp1', rank:1, title:'First-generation applicant growth',
+    stat:'About 13,000 in 2020–21 to about 43,000 in 2024–25',
+    outcomes:['Enrollment','Demand growth'], demographics:['First-gen','Hispanic/Latino','Low-income'],
+    why:'More Texas students are applying to college for the first time, which increases the need for step-by-step guidance for students and families.',
+    family:'Bilingual navigation can help families understand applications, deadlines, and the next steps after admission.',
+    sourceLabel:'Georgetown University Center on Education and the Workforce; Common App data',
+    sourceDate:'November 12, 2025',
+    sourceUrl:'https://feed.georgetown.edu/access-affordability/how-texas-more-than-tripled-the-number-of-first-gen-college-applicants/'
+  },
+  {
+    id:'dp2', rank:2, title:'First-generation graduation gap',
+    stat:'24% graduate vs. 59% for continuing-generation students',
+    outcomes:['Degree attainment','Persistence'], demographics:['First-gen','Low-income'],
+    why:'Students who are first in their family to attend college finish at much lower rates than their peers.',
+    family:'Ongoing navigation support can help students stay enrolled, solve problems early, and complete a credential.',
+    sourceLabel:'Common App / FirstGen Forward',
+    sourceDate:'2025',
+    sourceUrl:'https://www.firstgenforward.org/'
+  },
+  {
+    id:'dp3', rank:3, title:'Hispanic students who are first-generation',
+    stat:'About 51% of Hispanic students are first-generation',
+    outcomes:['Enrollment','Degree attainment'], demographics:['Hispanic/Latino','First-gen','Emergent bilingual/ELs'],
+    why:'Many Hispanic families are helping a student navigate college for the first time.',
+    family:'Bilingual support matters because parents and caregivers often want to stay involved in college decisions.',
+    sourceLabel:'National Student Clearinghouse Research Center, as cited by BestColleges',
+    sourceDate:'2025',
+    sourceUrl:'https://www.bestcolleges.com/research/hispanic-college-students-statistics/'
+  },
+  {
+    id:'dp4', rank:4, title:'Hispanic two-year enrollment',
+    stat:'About 37% attend public two-year colleges',
+    outcomes:['Enrollment','Transfer success'], demographics:['Hispanic/Latino','First-gen','Low-income'],
+    why:'Community college is often the entry point to higher education for Hispanic students.',
+    family:'Families need help choosing programs, understanding transfer rules, and making sure early classes count toward a degree.',
+    sourceLabel:'National Student Clearinghouse Research Center, as cited by BestColleges',
+    sourceDate:'2025',
+    sourceUrl:'https://www.bestcolleges.com/research/hispanic-college-students-statistics/'
+  },
+  {
+    id:'dp5', rank:5, title:'Texas counselor workload',
+    stat:'About 385 students per school counselor',
+    outcomes:['Navigation efficiency','Enrollment'], demographics:['All students','First-gen','Low-income','Emergent bilingual/ELs'],
+    why:'Counselors have limited time for one-on-one college planning when caseloads are this high.',
+    family:'Families may need extra help outside school to complete forms, compare options, and follow through on tasks.',
+    sourceLabel:'Texas Tribune reporting',
+    sourceDate:'October 26, 2025',
+    sourceUrl:'https://www.texastribune.org/2025/10/27/texas-first-generation-college-students-apply/'
+  },
+  {
+    id:'dp6', rank:6, title:'FAFSA completion for Class of 2026',
+    stat:'54.7% completed FAFSA by May 2026',
+    outcomes:['Affordability','Enrollment'], demographics:['First-gen','Low-income','Emergent bilingual/ELs'],
+    why:'Nearly half of seniors still had not completed the form at that point in the cycle.',
+    family:'Families may need hands-on help with financial aid, taxes, and document gathering.',
+    sourceLabel:'National College Attainment Network',
+    sourceDate:'May 14, 2026',
+    sourceUrl:'https://www.highereddive.com/news/fafsa-completion-rate-for-class-of-2026-highest-on-record/820295/'
+  },
+  {
+    id:'dp7', rank:7, title:'Community college transfer completion',
+    stat:'About 31.6% completed a bachelor’s degree after starting at community college',
+    outcomes:['Transfer success','Degree attainment'], demographics:['First-gen','Hispanic/Latino','Low-income'],
+    why:'Transfer is a major point where students can lose time, money, and momentum.',
+    family:'Students need help choosing the right courses, understanding transfer rules, and staying on track.',
+    sourceLabel:'Transfer data summarized by Community College Review',
+    sourceDate:'December 2025',
+    sourceUrl:'https://www.communitycollegereview.com/blog/transfer-pathways-2025-26-community-college-to-4-year-success-guide'
+  },
+  {
+    id:'dp8', rank:8, title:'Texas 8th-grade cohort outcome',
+    stat:'Fewer than 25% earned any higher education credential within 11 years',
+    outcomes:['Degree attainment','Persistence'], demographics:['First-gen','Low-income','Hispanic/Latino'],
+    why:'Many students do not reach completion even after years of opportunity.',
+    family:'Support needs to begin early and continue through college, not stop after high school graduation.',
+    sourceLabel:'Texas A&M University Data Science cohort analysis',
+    sourceDate:'2024 cohort analysis',
+    sourceUrl:'https://www.tamus.edu/data-science/'
+  },
+  {
+    id:'dp9', rank:9, title:'Financial stress and dropout risk',
+    stat:'59% of community college students considered dropping out because of financial stress',
+    outcomes:['Persistence','Affordability'], demographics:['Low-income','First-gen','Hispanic/Latino'],
+    why:'Money challenges can interrupt enrollment and academic progress.',
+    family:'Help with aid applications, emergency grants, and budgeting can protect persistence.',
+    sourceLabel:'UPCEA citing Ellucian Health',
+    sourceDate:'February 5, 2026',
+    sourceUrl:'https://upcea.edu/student-financial-stress-and-the-impact-on-community-college-enrollment/'
+  },
+  {
+    id:'dp10', rank:10, title:'Texas workforce credential goal',
+    stat:'Texas aims for 60% of adults ages 25–64 with a certificate or degree by 2030',
+    outcomes:['Workforce outcomes','Credential attainment'], demographics:['All students','First-gen','Low-income','Hispanic/Latino'],
+    why:'Texas employers need more workers with postsecondary credentials.',
+    family:'College and career navigation helps students choose pathways that lead to jobs and long-term earnings.',
+    sourceLabel:'Texas Higher Education Coordinating Board / Lumina Foundation',
+    sourceDate:'2025–2026',
+    sourceUrl:'https://www.highered.texas.gov/'
+  }
+];
+const demoOptions = [...new Set(data.flatMap(d=>d.demographics))].sort();
+const outcomeOptions = [...new Set(data.flatMap(d=>d.outcomes))].sort();
+const demoSel = document.getElementById('demoFilter');
+const outSel = document.getElementById('outcomeFilter');
+
+demoOptions.forEach(v => demoSel.add(new Option(v, v)));
+outcomeOptions.forEach(v => outSel.add(new Option(v, v)));
+demoSel.addEventListener('change', redraw);
+outSel.addEventListener('change', redraw);
+let selectedIds = new Set();
+
+function getVals(el){return [...el.selectedOptions].map(o=>o.value)}
+function filtered(){
+  const demos=getVals(demoSel), outs=getVals(outSel);
+  return data.filter(d => (demos.length===0 || demos.some(x=>d.demographics.includes(x))) && (outs.length===0 || outs.some(x=>d.outcomes.includes(x))));
+}
+function redraw(){
+  const f = filtered().sort((a,b)=>a.rank-b.rank);
+  const trace = {
+    type:'bar', orientation:'h',
+    y:f.map(d=>d.title),
+    x:f.map(d=>1),
+    customdata:f.map(d=>d.id),
+    marker:{color:f.map(d=>selectedIds.has(d.id)?'#ef4444':'#ECBA69')},
+    hovertemplate:'<b>%{y}</b><br>%{customdata}<extra></extra>'
+  };
+  Plotly.newPlot('chart', [trace], {
+    margin:{l:260,r:20,t:18,b:30},
+    paper_bgcolor:'#fff', plot_bgcolor:'#fff',
+    xaxis:{visible:false, fixedrange:true}, yaxis:{autorange:'reversed', fixedrange:true},
+    title:'Select one or more evidence points'
+  }, {displayModeBar:false});
+  document.getElementById('selectedPills').innerHTML = [...selectedIds].map(id => `<span class='pill'>${data.find(d=>d.id===id).title}</span>`).join('');
+  const container = document.getElementById('chart');
+  container.on('plotly_click', ev => { const id = ev.points[0].customdata; selectedIds.has(id)?selectedIds.delete(id):selectedIds.add(id); redraw(); });
+  buildEvidenceList(f);
+}
+function buildEvidenceList(list){
+  const el = document.getElementById('evidenceList');
+  el.innerHTML = list.map(d => `
+    <div class='item'>
+      <div class='label'>${d.outcomes.join(' • ')}</div>
+      <h3>${d.title}</h3>
+      <div class='metric'>Current data: ${d.stat}</div>
+      <div style='margin-top:8px;'><strong>Why it matters:</strong> ${d.why}</div>
+      <div style='margin-top:8px;'><strong>What this means for families:</strong> ${d.family}</div>
+      <div class='source'><strong>Source:</strong> ${d.sourceLabel}. <strong>Date:</strong> ${d.sourceDate}.</div>
+      <div class='source linklist'><a href='${d.sourceUrl}' target='_blank' rel='noopener noreferrer'>Open original source</a></div>
+    </div>`).join('');
+}
+function clearFilters(){
+  [...demoSel.options].forEach(o=>o.selected=false);
+  [...outSel.options].forEach(o=>o.selected=false);
+  selectedIds = new Set();
+  redraw();
+}
+function generateNarrative(){
+  let selected = data.filter(d=>selectedIds.has(d.id));
+  if(selected.length===0) selected = filtered().slice(0,3);
+  selected = [...selected].sort((a,b)=>a.rank-b.rank);
+  const paragraph = `Anchored Pathways is needed because the selected evidence points show that Texas families still face major barriers in college access, affordability, transfer, and completion. The data include ${selected.map(d=>d.stat).join('; ')}, with clear implications for ${[...new Set(selected.flatMap(d=>d.demographics))].join(', ')} students and families. Together, these findings show why bilingual, family-centered navigation is important: it helps students understand applications, financial aid, transfer choices, and the steps that lead to a credential. A source-linked, plain-language support model makes the current data easier for families, partners, and funders to understand and use.`;
+  document.getElementById('narrative').value = paragraph;
+}
+function copyNarrative(){
+  const t=document.getElementById('narrative'); t.select(); document.execCommand('copy');
+}
+redraw();
+</script>
+</body>
+</html>
+<style>@media (max-width: 1000px){#chart{height:420px}}</style>
