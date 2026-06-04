@@ -8,30 +8,30 @@
 <style>
 :root{--bg:#F5F5F5;--card:#FFFFFF;--ink:#1D4331;--muted:#5b6b63;--brand:#1D4331;--accent:#ECBA69;--line:#D8E6C8;}
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+body{margin:0;font-family:'Avenir Light','Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;background:var(--bg);color:var(--ink)}
 header{background:var(--brand);color:#fff;padding:18px 18px}
-header h1{margin:0 0 6px;font-size:24px}
-header p{margin:0;max-width:980px;line-height:1.45}
-main{padding:14px 14px 20px;max-width:1200px;margin:0 auto}
-.notice{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;line-height:1.45}
-.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:12px;align-items:start}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.05);padding:14px}
-.controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
-select,button,textarea{font-size:14px;border-radius:10px;border:1px solid #cbd5e1;padding:10px}
-select{min-width:180px}
+header h1{margin:0 0 4px;font-size:20px;font-family:'Montserrat Black','Montserrat',Arial,sans-serif;font-weight:900}
+header p{margin:0;max-width:980px;line-height:1.35;font-size:16px;font-family:'Avenir Light','Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif}
+main{padding:12px 12px 16px;max-width:1200px;margin:0 auto}
+.notice{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:10px;line-height:1.35;font-size:16px;font-family:'Avenir Light','Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:10px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.05);padding:12px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+select,button,textarea{font-size:16px;border-radius:10px;border:1px solid #cbd5e1;padding:9px;font-family:'Avenir Light','Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif}
+select{min-width:170px}
 button{background:var(--accent);color:#1D4331;border:none;cursor:pointer}
 button.secondary{background:#e5e7eb;color:#1D4331}
-#chart{height:460px}
-small,.small{color:var(--muted);font-size:12px;line-height:1.45}
-textarea{width:100%;min-height:150px;resize:vertical}
+#chart{height:400px}
+small,.small{color:var(--muted);font-size:16px;line-height:1.35;font-family:'Avenir Light','Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif}
+textarea{width:100%;min-height:130px;resize:vertical}
 .pills{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
 .pill{background:#E5F2D2;color:#1D4331;padding:6px 10px;border-radius:999px;font-size:12px}
 .source{display:block;font-size:12px;margin-top:6px}
-.item{padding:10px 0;border-top:1px solid var(--line)}
+.item{padding:8px 0;border-top:1px solid var(--line)}
 .item:first-child{border-top:none;padding-top:0}
-.item h3{margin:0 0 6px;font-size:17px;color:#0f172a}
+.item h3{margin:0 0 5px;font-size:20px;color:#0f172a;font-family:'Montserrat Black','Montserrat',Arial,sans-serif;font-weight:900}
 .label{display:inline-block;background:#E5F2D2;color:#1D4331;padding:4px 8px;border-radius:999px;font-size:12px;margin-bottom:8px}
-.metric{font-weight:700;font-size:18px}
+.metric{font-weight:700;font-size:16px}
 .linklist a{word-break:break-word}
 @media (max-width: 1000px){.grid{grid-template-columns:1fr}#chart{height:420px}}
 </style>
@@ -56,19 +56,22 @@ textarea{width:100%;min-height:150px;resize:vertical}
       <small>Tip: hold Ctrl/Command to select more than one item in the filters.</small>
     </div>
     <div class="card">
-      <h2 style="margin:0 0 10px;font-size:20px;">Why AP Is Needed</h2>
+      <h2 style="margin:0 0 10px;font-size:20px;font-family:'Montserrat Black','Montserrat',Arial,sans-serif;font-weight:900;">Why AP Is Needed</h2>
       <div class="controls">
         <button onclick="generateNarrative()">Summarize</button>
         <button class="secondary" onclick="copyNarrative()">Copy text</button>
       </div>
       <textarea id="narrative" placeholder="Select data points and click Summarize."></textarea>
+      <div class="small" style="margin-top:8px;">Selected evidence</div>
+      <div id="selectedEvidenceBox" style="border:1px solid var(--line);border-radius:12px;padding:10px;min-height:84px;background:#fff;line-height:1.35;">Click an evidence card below to populate this box.</div>
       <div class="pills" id="selectedPills"></div>
       <div class="small" style="margin-top:10px;">Suggested use: paste the summary into a memo, board deck, or report.</div>
     </div>
   </div>
 
   <div class="card" style="margin-top:16px;">
-    <h2 style="margin:0 0 10px;font-size:20px;">Source-linked evidence</h2>
+    <h2 style="margin:0 0 10px;font-size:20px;font-family:'Montserrat Black','Montserrat',Arial,sans-serif;font-weight:900;">Source-linked evidence</h2>
+    <div class="small" style="margin-bottom:10px;">Click an evidence card to send its wording to the summary box on the right.</div>
     <div id="evidenceList"></div>
   </div>
 </main>
@@ -215,15 +218,25 @@ function redraw(){
 function buildEvidenceList(list){
   const el = document.getElementById('evidenceList');
   el.innerHTML = list.map(d => `
-    <div class='item'>
-      <div class='label'>${d.outcomes.join(' • ')}</div>
-      <h3>${d.title}</h3>
-      <div class='metric'>Current data: ${d.stat}</div>
+    <details class='item'>
+      <summary style='cursor:pointer;list-style:none;'>
+        <div class='label'>${d.outcomes.join(' • ')}</div>
+        <h3 style='display:inline;margin-left:8px;'>${d.title}</h3>
+      </summary>
+      <div style='margin-top:8px;'><strong>Current data:</strong> ${d.stat}</div>
       <div style='margin-top:8px;'><strong>Why it matters:</strong> ${d.why}</div>
       <div style='margin-top:8px;'><strong>What this means for families:</strong> ${d.family}</div>
       <div class='source'><strong>Source:</strong> ${d.sourceLabel}. <strong>Date:</strong> ${d.sourceDate}.</div>
       <div class='source linklist'><a href='${d.sourceUrl}' target='_blank' rel='noopener noreferrer'>Open original source</a></div>
-    </div>`).join('');
+      <div style='margin-top:10px;'><button onclick="populateSelectedEvidence('${d.id}')">Use this evidence</button></div>
+    </details>`).join('');
+}
+function populateSelectedEvidence(id){
+  const d = data.find(x=>x.id===id);
+  document.getElementById('selectedEvidenceBox').innerHTML = `<strong>${d.title}</strong><br><div class='metric' style='margin-top:4px;'>${d.stat}</div><div style='margin-top:8px;'><strong>Why it matters:</strong> ${d.why}</div><div style='margin-top:8px;'><strong>What this means for families:</strong> ${d.family}</div><div class='source'><strong>Source:</strong> ${d.sourceLabel}. <strong>Date:</strong> ${d.sourceDate}.</div><div class='source linklist'><a href='${d.sourceUrl}' target='_blank' rel='noopener noreferrer'>Open original source</a></div>`;
+  document.getElementById('narrative').value = `${d.title}: ${d.stat}. ${d.why} ${d.family} Source: ${d.sourceLabel}, ${d.sourceDate}.`;
+  selectedIds.add(id);
+  redraw();
 }
 function clearFilters(){
   [...demoSel.options].forEach(o=>o.selected=false);
