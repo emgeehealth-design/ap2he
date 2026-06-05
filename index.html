@@ -3,257 +3,140 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Anchored Pathways Evidence Dashboard</title>
+<title>Anchored Pathways Evidence Navigator</title>
 <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
 <style>
-:root{--bg:#F5F5F5;--card:#FFFFFF;--ink:#1D4331;--muted:#5b6b63;--brand:#1D4331;--accent:#ECBA69;--line:#D8E6C8;}
+:root{--bg:#F5F5F5;--card:#FFFFFF;--ink:#1D4331;--muted:#5b6b63;--brand:#1D4331;--accent:#ECBA69;--line:#D8E6C8;--shadow:0 10px 30px rgba(0,0,0,.12)}
 *{box-sizing:border-box}
 body{margin:0;font-family:'Avenir Light','Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;background:var(--bg);color:var(--ink)}
 header{background:var(--brand);color:#fff;padding:18px 18px}
 header h1{margin:0 0 4px;font-size:20px;font-family:'Montserrat Black','Montserrat',Arial,sans-serif;font-weight:900}
-header p{margin:0;max-width:980px;line-height:1.35;font-size:16px;font-family:'Avenir Light','Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif}
-main{padding:12px 12px 16px;max-width:1200px;margin:0 auto}
-.notice{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:10px;line-height:1.35;font-size:16px;font-family:'Avenir Light','Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif}
-.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:10px;align-items:start}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.05);padding:12px}
+header p{margin:0;max-width:980px;line-height:1.35;font-size:16px}
+main{padding:12px;max-width:1240px;margin:0 auto}
+.notice,.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.notice{padding:10px 12px;margin-bottom:10px;line-height:1.35}
+.grid{display:grid;grid-template-columns:1fr;gap:10px;align-items:start}
+.card{padding:12px}
 .controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-select,button,textarea{font-size:16px;border-radius:10px;border:1px solid #cbd5e1;padding:9px;font-family:'Avenir Light','Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif}
-select{min-width:170px}
+select,button,input{font-size:16px;border-radius:10px;border:1px solid #cbd5e1;padding:9px;font-family:'Avenir Light','Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif}
+select{min-width:180px}
+input{width:100%}
 button{background:var(--accent);color:#1D4331;border:none;cursor:pointer}
 button.secondary{background:#e5e7eb;color:#1D4331}
-#chart{height:400px}
-small,.small{color:var(--muted);font-size:16px;line-height:1.35;font-family:'Avenir Light','Avenir Next','Helvetica Neue',Helvetica,Arial,sans-serif}
-textarea{width:100%;min-height:130px;resize:vertical}
-.pills{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+#chart{height:300px}
+small,.small{color:var(--muted);font-size:16px;line-height:1.35}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .pill{background:#E5F2D2;color:#1D4331;padding:6px 10px;border-radius:999px;font-size:12px}
-.source{display:block;font-size:12px;margin-top:6px}
-.item{padding:8px 0;border-top:1px solid var(--line)}
-.item:first-child{border-top:none;padding-top:0}
-.item h3{margin:0 0 5px;font-size:20px;color:#0f172a;font-family:'Montserrat Black','Montserrat',Arial,sans-serif;font-weight:900}
-.label{display:inline-block;background:#E5F2D2;color:#1D4331;padding:4px 8px;border-radius:999px;font-size:12px;margin-bottom:8px}
-.metric{font-weight:700;font-size:16px}
+#evidenceGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.evidence-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;min-height:150px}
+.evidence-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#b9d7a1}
+.evidence-card h3{margin:0 0 8px;font-size:18px;font-family:'Montserrat Black','Montserrat',Arial,sans-serif;font-weight:900}
+.tag{display:inline-block;background:#E5F2D2;color:#1D4331;padding:4px 8px;border-radius:999px;font-size:12px;margin:0 6px 6px 0}
+.metric{font-weight:700;font-size:16px;line-height:1.35}
+.source{display:block;font-size:12px;margin-top:8px;color:var(--muted)}
 .linklist a{word-break:break-word}
-@media (max-width: 1000px){.grid{grid-template-columns:1fr}#chart{height:420px}}
+.modal{position:fixed;inset:0;background:rgba(13,22,17,.55);display:none;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .2s ease;z-index:50}
+.modal.show{display:flex;opacity:1}
+.modal-panel{width:min(920px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:var(--shadow);transform:translateY(10px) scale(.98);transition:transform .2s ease;border:1px solid var(--line)}
+.modal.show .modal-panel{transform:translateY(0) scale(1)}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 18px 12px;border-bottom:1px solid var(--line)}
+.modal-head h2{margin:0;font-size:22px;font-family:'Montserrat Black','Montserrat',Arial,sans-serif;font-weight:900}
+.close{background:#e5e7eb;border:none;border-radius:999px;width:36px;height:36px;flex:0 0 auto}
+.modal-body{padding:16px 18px 18px;line-height:1.45}
+.section{margin-top:14px}
+.section h4{margin:0 0 8px;font-size:15px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+@media (max-width: 1000px){.grid{grid-template-columns:1fr}#chart{height:380px}#evidenceGrid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media (max-width: 640px){
+header h1{font-size:18px}
+header p,.notice,small,.small,select,input,button,textarea,body{font-size:15px}
+#chart{height:330px}
+.controls{gap:6px}
+select{min-width:0;flex:1 1 100%}
+#evidenceGrid{grid-template-columns:1fr}
+.evidence-card{min-height:auto;padding:11px}
+.evidence-card h3{font-size:17px}
+.modal{padding:12px}
+.modal-head h2{font-size:19px}
+.modal-body{padding:14px}
+textarea{min-height:150px}
+}
 </style>
 </head>
 <body>
 <header>
-  <h1>Anchored Pathways Evidence Dashboard</h1>
-  <p>Current 2025–2026 data on Texas college access, persistence, transfer, and workforce outcomes. Each point includes a plain-language explanation and a source link so users can check the original evidence.</p>
+  <h1>Anchored Pathways Evidence Navigator</h1>
+  <p>Filter evidence points by category, search for a specific item, and open any card to review the full source text, linked primary evidence, and methodology notes.</p>
 </header>
 <main>
-  <div class="notice">
-    <strong>How to use this dashboard:</strong> Select one or more data points in the chart, or use the filters to narrow the view. The Why AP Is Needed section helps you turn selected data into a short plain-language summary of the need. It highlights the most important points so funders, partners, and families can quickly understand the current evidence.
-  </div>
-  <div class="grid">
-    <div class="card">
+  <div class="notice"><strong>How to use this dashboard:</strong> Use the category filters and search bar to narrow the evidence grid. Click any card to open a modal with the complete source text and supporting notes.</div>
+  <div class="card">
       <div class="controls">
-        <select id="demoFilter" multiple size="4" title="Filter by student demographics"></select>
-        <select id="outcomeFilter" multiple size="4" title="Filter by outcomes"></select>
-        <button onclick="clearFilters()">Clear filters</button>
+        <select id="demoFilter" multiple size="4" title="Filter by category"></select>
+        <select id="outcomeFilter" multiple size="4" title="Filter by outcome"></select>
       </div>
       <div id="chart"></div>
       <small>Tip: hold Ctrl/Command to select more than one item in the filters.</small>
     </div>
-    <div class="card">
+    <div class="card" id="whyCard">
       <h2 style="margin:0 0 10px;font-size:20px;font-family:'Montserrat Black','Montserrat',Arial,sans-serif;font-weight:900;">Why AP Is Needed</h2>
-      <div class="controls">
-        <button onclick="generateNarrative()">Summarize</button>
-        <button class="secondary" onclick="copyNarrative()">Copy text</button>
+      <div class="controls"><button onclick="generateNarrative()">Summarize</button><button class="secondary" onclick="copyNarrative()">Copy text</button></div>
+      <textarea id="narrative" placeholder="Click an evidence card to populate this paragraph."></textarea>
+    </div>
+    <div class="card">
+      <h2 style="margin:0 0 10px;font-size:20px;font-family:'Montserrat Black','Montserrat',Arial,sans-serif;font-weight:900;">Evidence cards</h2>
+      <input id="searchBar" type="search" placeholder="Search evidence points by keyword, title, or category" />
+      <div id="evidenceGrid"></div>
+    </div>
+</main>
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div>
+        <h2 id="modalTitle"></h2>
+        <div id="modalTags" style="margin-top:8px;"></div>
       </div>
-      <textarea id="narrative" placeholder="Select data points and click Summarize."></textarea>
-      <div class="small" style="margin-top:8px;">Selected evidence</div>
-      <div id="selectedEvidenceBox" style="border:1px solid var(--line);border-radius:12px;padding:10px;min-height:84px;background:#fff;line-height:1.35;">Click an evidence card below to populate this box.</div>
-      <div class="pills" id="selectedPills"></div>
-      <div class="small" style="margin-top:10px;">Suggested use: paste the summary into a memo, board deck, or report.</div>
+      <button class="close" aria-label="Close modal" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="modalStat" class="metric"></div>
+      <div class="section"><h4>Why it matters</h4><div id="modalWhy"></div></div>
+      <div class="section"><h4>What this means for families</h4><div id="modalFamily"></div></div>
+      <div class="section"><h4>Source text</h4><div id="modalSourceText"></div></div>
+      <div class="section"><h4>Primary evidence</h4><div id="modalPrimary"></div></div>
+      <div class="section"><h4>Methodology notes</h4><div id="modalMethod"></div></div>
+      <div class="section"><h4>Source</h4><div id="modalSource"></div></div>
     </div>
   </div>
-
-  <div class="card" style="margin-top:16px;">
-    <h2 style="margin:0 0 10px;font-size:20px;font-family:'Montserrat Black','Montserrat',Arial,sans-serif;font-weight:900;">Source-linked evidence</h2>
-    <div class="small" style="margin-bottom:10px;">Click an evidence card to send its wording to the summary box on the right.</div>
-    <div id="evidenceList"></div>
-  </div>
-</main>
+</div>
 <script>
-const data = [
-  {
-    id:'dp1', rank:1, title:'First-generation applicant growth',
-    stat:'About 13,000 in 2020–21 to about 43,000 in 2024–25',
-    outcomes:['Enrollment','Demand growth'], demographics:['First-gen','Hispanic/Latino','Low-income'],
-    why:'More Texas students are applying to college for the first time, which increases the need for step-by-step guidance for students and families.',
-    family:'Bilingual navigation can help families understand applications, deadlines, and the next steps after admission.',
-    sourceLabel:'Georgetown University Center on Education and the Workforce; Common App data',
-    sourceDate:'November 12, 2025',
-    sourceUrl:'https://feed.georgetown.edu/access-affordability/how-texas-more-than-tripled-the-number-of-first-gen-college-applicants/'
-  },
-  {
-    id:'dp2', rank:2, title:'First-generation graduation gap',
-    stat:'24% graduate vs. 59% for continuing-generation students',
-    outcomes:['Degree attainment','Persistence'], demographics:['First-gen','Low-income'],
-    why:'Students who are first in their family to attend college finish at much lower rates than their peers.',
-    family:'Ongoing navigation support can help students stay enrolled, solve problems early, and complete a credential.',
-    sourceLabel:'Common App / FirstGen Forward',
-    sourceDate:'2025',
-    sourceUrl:'https://www.firstgenforward.org/'
-  },
-  {
-    id:'dp3', rank:3, title:'Hispanic students who are first-generation',
-    stat:'About 51% of Hispanic students are first-generation',
-    outcomes:['Enrollment','Degree attainment'], demographics:['Hispanic/Latino','First-gen','Emergent bilingual/ELs'],
-    why:'Many Hispanic families are helping a student navigate college for the first time.',
-    family:'Bilingual support matters because parents and caregivers often want to stay involved in college decisions.',
-    sourceLabel:'National Student Clearinghouse Research Center, as cited by BestColleges',
-    sourceDate:'2025',
-    sourceUrl:'https://www.bestcolleges.com/research/hispanic-college-students-statistics/'
-  },
-  {
-    id:'dp4', rank:4, title:'Hispanic two-year enrollment',
-    stat:'About 37% attend public two-year colleges',
-    outcomes:['Enrollment','Transfer success'], demographics:['Hispanic/Latino','First-gen','Low-income'],
-    why:'Community college is often the entry point to higher education for Hispanic students.',
-    family:'Families need help choosing programs, understanding transfer rules, and making sure early classes count toward a degree.',
-    sourceLabel:'National Student Clearinghouse Research Center, as cited by BestColleges',
-    sourceDate:'2025',
-    sourceUrl:'https://www.bestcolleges.com/research/hispanic-college-students-statistics/'
-  },
-  {
-    id:'dp5', rank:5, title:'Texas counselor workload',
-    stat:'About 385 students per school counselor',
-    outcomes:['Navigation efficiency','Enrollment'], demographics:['All students','First-gen','Low-income','Emergent bilingual/ELs'],
-    why:'Counselors have limited time for one-on-one college planning when caseloads are this high.',
-    family:'Families may need extra help outside school to complete forms, compare options, and follow through on tasks.',
-    sourceLabel:'Texas Tribune reporting',
-    sourceDate:'October 26, 2025',
-    sourceUrl:'https://www.texastribune.org/2025/10/27/texas-first-generation-college-students-apply/'
-  },
-  {
-    id:'dp6', rank:6, title:'FAFSA completion for Class of 2026',
-    stat:'54.7% completed FAFSA by May 2026',
-    outcomes:['Affordability','Enrollment'], demographics:['First-gen','Low-income','Emergent bilingual/ELs'],
-    why:'Nearly half of seniors still had not completed the form at that point in the cycle.',
-    family:'Families may need hands-on help with financial aid, taxes, and document gathering.',
-    sourceLabel:'National College Attainment Network',
-    sourceDate:'May 14, 2026',
-    sourceUrl:'https://www.highereddive.com/news/fafsa-completion-rate-for-class-of-2026-highest-on-record/820295/'
-  },
-  {
-    id:'dp7', rank:7, title:'Community college transfer completion',
-    stat:'About 31.6% completed a bachelor’s degree after starting at community college',
-    outcomes:['Transfer success','Degree attainment'], demographics:['First-gen','Hispanic/Latino','Low-income'],
-    why:'Transfer is a major point where students can lose time, money, and momentum.',
-    family:'Students need help choosing the right courses, understanding transfer rules, and staying on track.',
-    sourceLabel:'Transfer data summarized by Community College Review',
-    sourceDate:'December 2025',
-    sourceUrl:'https://www.communitycollegereview.com/blog/transfer-pathways-2025-26-community-college-to-4-year-success-guide'
-  },
-  {
-    id:'dp8', rank:8, title:'Texas 8th-grade cohort outcome',
-    stat:'Fewer than 25% earned any higher education credential within 11 years',
-    outcomes:['Degree attainment','Persistence'], demographics:['First-gen','Low-income','Hispanic/Latino'],
-    why:'Many students do not reach completion even after years of opportunity.',
-    family:'Support needs to begin early and continue through college, not stop after high school graduation.',
-    sourceLabel:'Texas A&M University Data Science cohort analysis',
-    sourceDate:'2024 cohort analysis',
-    sourceUrl:'https://www.tamus.edu/data-science/'
-  },
-  {
-    id:'dp9', rank:9, title:'Financial stress and dropout risk',
-    stat:'59% of community college students considered dropping out because of financial stress',
-    outcomes:['Persistence','Affordability'], demographics:['Low-income','First-gen','Hispanic/Latino'],
-    why:'Money challenges can interrupt enrollment and academic progress.',
-    family:'Help with aid applications, emergency grants, and budgeting can protect persistence.',
-    sourceLabel:'UPCEA citing Ellucian Health',
-    sourceDate:'February 5, 2026',
-    sourceUrl:'https://upcea.edu/student-financial-stress-and-the-impact-on-community-college-enrollment/'
-  },
-  {
-    id:'dp10', rank:10, title:'Texas workforce credential goal',
-    stat:'Texas aims for 60% of adults ages 25–64 with a certificate or degree by 2030',
-    outcomes:['Workforce outcomes','Credential attainment'], demographics:['All students','First-gen','Low-income','Hispanic/Latino'],
-    why:'Texas employers need more workers with postsecondary credentials.',
-    family:'College and career navigation helps students choose pathways that lead to jobs and long-term earnings.',
-    sourceLabel:'Texas Higher Education Coordinating Board / Lumina Foundation',
-    sourceDate:'2025–2026',
-    sourceUrl:'https://www.highered.texas.gov/'
-  }
+const data=[
+{id:'dp1',rank:1,title:'First-generation applicant growth',stat:'About 13,000 in 2020–21 to about 43,000 in 2024–25',outcomes:['Enrollment','Demand growth'],demographics:['First-gen','Hispanic/Latino','Family navigation'],why:'More Texas students are applying to college for the first time, which increases the need for step-by-step guidance for students and families.',family:'Family-centered navigation can help households understand applications, deadlines, and the next steps after admission.',sourceLabel:'Georgetown University Center on Education and the Workforce; Common App data',sourceDate:'November 12, 2025',sourceUrl:'https://feed.georgetown.edu/access-affordability/how-texas-more-than-tripled-the-number-of-first-gen-college-applicants/',sourceText:'How Texas more than tripled the number of first-gen college applicants.',primaryEvidence:'Article summarizing Common App trends and Texas first-generation applicant growth.',methodology:'Secondary summary of published application trend data; best used as context-setting evidence rather than a primary dataset.'},
+{id:'dp2',rank:2,title:'First-generation graduation gap',stat:'24% graduate vs. 59% for continuing-generation students',outcomes:['Degree attainment','Persistence'],demographics:['First-gen','Family navigation'],why:'Students who are first in their family to attend college finish at much lower rates than their peers.',family:'Ongoing navigation support can help students stay enrolled, solve problems early, and complete a credential.',sourceLabel:'FirstGen Forward',sourceDate:'2025',sourceUrl:'https://www.firstgenforward.org/',sourceText:'First-generation students graduate at lower rates than continuing-generation peers.',primaryEvidence:'Nationally reported first-generation completion comparison.',methodology:'Organization summary of national attainment patterns; suitable for high-level need framing.'},
+{id:'dp3',rank:3,title:'Hispanic students who are first-generation',stat:'About 51% of Hispanic students are first-generation',outcomes:['Enrollment','Degree attainment'],demographics:['Hispanic/Latino','First-gen','Family navigation'],why:'Many Hispanic families are helping a student navigate college for the first time.',family:'Bilingual support matters because parents and caregivers often want to stay involved in college decisions.',sourceLabel:'National Student Clearinghouse Research Center, as cited by BestColleges',sourceDate:'2025',sourceUrl:'https://www.bestcolleges.com/research/hispanic-college-students-statistics/',sourceText:'A large share of Hispanic college students are first-generation.',primaryEvidence:'Research summary citing National Student Clearinghouse data.',methodology:'Third-party summary of published research; use as directional evidence and verify against the underlying research when possible.'},
+{id:'dp4',rank:4,title:'Hispanic two-year enrollment',stat:'About 37% attend public two-year colleges',outcomes:['Enrollment','Transfer success'],demographics:['Hispanic/Latino','First-gen','Family navigation'],why:'Community college is often the entry point to higher education for Hispanic students.',family:'Families need help choosing programs, understanding transfer rules, and making sure early classes count toward a degree.',sourceLabel:'National Student Clearinghouse Research Center, as cited by BestColleges',sourceDate:'2025',sourceUrl:'https://www.bestcolleges.com/research/hispanic-college-students-statistics/',sourceText:'Many Hispanic students begin at public two-year colleges.',primaryEvidence:'Research summary citing enrollment patterns for Hispanic students.',methodology:'Secondary summary of enrollment distribution data; best used to show pathway entry points.'},
+{id:'dp5',rank:5,title:'Texas counselor workload',stat:'About 385 students per school counselor',outcomes:['Navigation efficiency','Enrollment'],demographics:['All students','Family navigation'],why:'Counselors have limited time for one-on-one college planning when caseloads are this high.',family:'Families may need extra help outside school to complete forms, compare options, and follow through on tasks.',sourceLabel:'Texas Tribune reporting',sourceDate:'October 26, 2025',sourceUrl:'https://www.texastribune.org/2025/10/27/texas-first-generation-college-students-apply/',sourceText:'Texas counselors manage large student caseloads, limiting individualized guidance.',primaryEvidence:'News reporting on counselor workload and college-going support.',methodology:'Journalistic source; useful for illustrating service gaps and advisor capacity constraints.'},
+{id:'dp6',rank:6,title:'FAFSA completion for Class of 2026',stat:'54.7% completed FAFSA by May 2026',outcomes:['Affordability','Enrollment'],demographics:['First-gen','Family navigation'],why:'Nearly half of seniors still had not completed the form at that point in the cycle.',family:'Families may need hands-on help with financial aid, taxes, and document gathering.',sourceLabel:'National College Attainment Network',sourceDate:'May 14, 2026',sourceUrl:'https://www.highereddive.com/news/fafsa-completion-rate-for-class-of-2026-highest-on-record/820295/',sourceText:'FAFSA completion remained incomplete for many seniors during the cycle.',primaryEvidence:'FAFSA completion reporting and state-by-state tracking.',methodology:'Public completion tracking updated during the cycle; useful for monitoring real-time progress.'},
+{id:'dp7',rank:7,title:'Community college transfer completion',stat:'About 31.6% completed a bachelor’s degree after starting at community college',outcomes:['Transfer success','Degree attainment'],demographics:['First-gen','Hispanic/Latino','Family navigation'],why:'Transfer is a major point where students can lose time, money, and momentum.',family:'Students need help choosing the right courses, understanding transfer rules, and staying on track.',sourceLabel:'Transfer data summarized by Community College Review',sourceDate:'December 2025',sourceUrl:'https://www.communitycollegereview.com/blog/transfer-pathways-2025-26-community-college-to-4-year-success-guide',sourceText:'Only a portion of community college starters complete a bachelor’s degree.',primaryEvidence:'Transfer completion summary from compiled educational data.',methodology:'Compiled secondary-source summary; strongest when paired with primary state or system transfer data.'},
+{id:'dp8',rank:8,title:'Texas 8th-grade cohort outcome',stat:'Fewer than 25% earned any higher education credential within 11 years',outcomes:['Degree attainment','Persistence'],demographics:['First-gen','Family navigation','Texas students'],why:'Many students do not reach completion even after years of opportunity.',family:'Support needs to begin early and continue through college, not stop after high school graduation.',sourceLabel:'Texas A&M University Data Science cohort analysis',sourceDate:'2024 cohort analysis',sourceUrl:'https://www.tamus.edu/data-science/',sourceText:'Long-term cohort tracking shows limited credential attainment over time.',primaryEvidence:'State cohort analysis tracking educational outcomes over an 11-year period.',methodology:'Longitudinal cohort analysis; strong for showing system-level outcomes and long-term persistence patterns.'},
+{id:'dp9',rank:9,title:'Financial stress and dropout risk',stat:'59% of community college students considered dropping out because of financial stress',outcomes:['Persistence','Affordability'],demographics:['Family navigation','First-gen'],why:'Money challenges can interrupt enrollment and academic progress.',family:'Help with aid applications, emergency grants, and budgeting can protect persistence.',sourceLabel:'UPCEA citing Ellucian Health',sourceDate:'February 5, 2026',sourceUrl:'https://upcea.edu/student-financial-stress-and-the-impact-on-community-college-enrollment/',sourceText:'Many students report financial stress as a reason to consider leaving school.',primaryEvidence:'Survey-based reporting on student financial stress.',methodology:'Survey evidence reported through a higher-education association; useful for showing affordability barriers.'},
+{id:'dp10',rank:10,title:'Texas workforce credential goal',stat:'Texas aims for 60% of adults ages 25–64 with a certificate or degree by 2030',outcomes:['Workforce outcomes','Credential attainment'],demographics:['All students','Family navigation','Texas workforce'],why:'Texas employers need more workers with postsecondary credentials.',family:'College and career navigation helps students choose pathways that lead to jobs and long-term earnings.',sourceLabel:'Texas Higher Education Coordinating Board / Lumina Foundation',sourceDate:'2025–2026',sourceUrl:'https://www.highered.texas.gov/',sourceText:'Texas has a statewide postsecondary attainment goal tied to workforce needs.',primaryEvidence:'State higher-education attainment goal and associated tracking resources.',methodology:'Policy target and statewide attainment framework; useful for connecting education pathways to workforce outcomes.'}
 ];
-const demoOptions = [...new Set(data.flatMap(d=>d.demographics))].sort();
-const outcomeOptions = [...new Set(data.flatMap(d=>d.outcomes))].sort();
-const demoSel = document.getElementById('demoFilter');
-const outSel = document.getElementById('outcomeFilter');
-
-demoOptions.forEach(v => demoSel.add(new Option(v, v)));
-outcomeOptions.forEach(v => outSel.add(new Option(v, v)));
-demoSel.addEventListener('change', redraw);
-outSel.addEventListener('change', redraw);
-let selectedIds = new Set();
-
+const demoOptions=[...new Set(data.flatMap(d=>d.demographics))].sort();
+const outcomeOptions=[...new Set(data.flatMap(d=>d.outcomes))].sort();
+const demoSel=document.getElementById('demoFilter'); const outSel=document.getElementById('outcomeFilter');
+const searchBar=document.getElementById('searchBar'); let selectedIds=new Set();
+demoOptions.forEach(v=>demoSel.add(new Option(v,v))); outcomeOptions.forEach(v=>outSel.add(new Option(v,v)));
+demoSel.addEventListener('change',redraw); outSel.addEventListener('change',redraw); searchBar.addEventListener('input',redraw);
 function getVals(el){return [...el.selectedOptions].map(o=>o.value)}
-function filtered(){
-  const demos=getVals(demoSel), outs=getVals(outSel);
-  return data.filter(d => (demos.length===0 || demos.some(x=>d.demographics.includes(x))) && (outs.length===0 || outs.some(x=>d.outcomes.includes(x))));
-}
-function redraw(){
-  const f = filtered().sort((a,b)=>a.rank-b.rank);
-  const trace = {
-    type:'bar', orientation:'h',
-    y:f.map(d=>d.title),
-    x:f.map(d=>1),
-    customdata:f.map(d=>d.id),
-    marker:{color:f.map(d=>selectedIds.has(d.id)?'#ECBA69':'#1D4331')},
-    hovertemplate:'<b>%{y}</b><br>%{customdata}<extra></extra>'
-  };
-  Plotly.newPlot('chart', [trace], {
-    margin:{l:260,r:20,t:18,b:30},
-    paper_bgcolor:'#fff', plot_bgcolor:'#fff',
-    xaxis:{visible:false, fixedrange:true}, yaxis:{autorange:'reversed', fixedrange:true},
-    title:'Select one or more evidence points'
-  }, {displayModeBar:false});
-  document.getElementById('selectedPills').innerHTML = [...selectedIds].map(id => `<span class='pill'>${data.find(d=>d.id===id).title}</span>`).join('');
-  const container = document.getElementById('chart');
-  container.on('plotly_click', ev => { const id = ev.points[0].customdata; selectedIds.has(id)?selectedIds.delete(id):selectedIds.add(id); redraw(); });
-  buildEvidenceList(f);
-}
-function buildEvidenceList(list){
-  const el = document.getElementById('evidenceList');
-  el.innerHTML = list.map(d => `
-    <details class='item'>
-      <summary style='cursor:pointer;list-style:none;'>
-        <div class='label'>${d.outcomes.join(' • ')}</div>
-        <h3 style='display:inline;margin-left:8px;'>${d.title}</h3>
-      </summary>
-      <div style='margin-top:8px;'><strong>Current data:</strong> ${d.stat}</div>
-      <div style='margin-top:8px;'><strong>Why it matters:</strong> ${d.why}</div>
-      <div style='margin-top:8px;'><strong>What this means for families:</strong> ${d.family}</div>
-      <div class='source'><strong>Source:</strong> ${d.sourceLabel}. <strong>Date:</strong> ${d.sourceDate}.</div>
-      <div class='source linklist'><a href='${d.sourceUrl}' target='_blank' rel='noopener noreferrer'>Open original source</a></div>
-      <div style='margin-top:10px;'><button onclick="populateSelectedEvidence('${d.id}')">Use this evidence</button></div>
-    </details>`).join('');
-}
-function populateSelectedEvidence(id){
-  const d = data.find(x=>x.id===id);
-  document.getElementById('selectedEvidenceBox').innerHTML = `<strong>${d.title}</strong><br><div class='metric' style='margin-top:4px;'>${d.stat}</div><div style='margin-top:8px;'><strong>Why it matters:</strong> ${d.why}</div><div style='margin-top:8px;'><strong>What this means for families:</strong> ${d.family}</div><div class='source'><strong>Source:</strong> ${d.sourceLabel}. <strong>Date:</strong> ${d.sourceDate}.</div><div class='source linklist'><a href='${d.sourceUrl}' target='_blank' rel='noopener noreferrer'>Open original source</a></div>`;
-  document.getElementById('narrative').value = `${d.title}: ${d.stat}. ${d.why} ${d.family} Source: ${d.sourceLabel}, ${d.sourceDate}.`;
-  selectedIds.add(id);
-  redraw();
-}
-function clearFilters(){
-  [...demoSel.options].forEach(o=>o.selected=false);
-  [...outSel.options].forEach(o=>o.selected=false);
-  selectedIds = new Set();
-  redraw();
-}
-function generateNarrative(){
-  let selected = data.filter(d=>selectedIds.has(d.id));
-  if(selected.length===0) selected = filtered().slice(0,3);
-  selected = [...selected].sort((a,b)=>a.rank-b.rank);
-  const paragraph = `Anchored Pathways is needed because the selected evidence points show that Texas families still face major barriers in college access, affordability, transfer, and completion. The data include ${selected.map(d=>d.stat).join('; ')}, with clear implications for ${[...new Set(selected.flatMap(d=>d.demographics))].join(', ')} students and families. Together, these findings show why bilingual, family-centered navigation is important: it helps students understand applications, financial aid, transfer choices, and the steps that lead to a credential. A source-linked, plain-language support model makes the current data easier for families, partners, and funders to understand and use.`;
-  document.getElementById('narrative').value = paragraph;
-}
-function copyNarrative(){
-  const t=document.getElementById('narrative'); t.select(); document.execCommand('copy');
-}
+function filtered(){const demos=getVals(demoSel), outs=getVals(outSel), q=searchBar.value.trim().toLowerCase(); return data.filter(d=>(demos.length===0||demos.some(x=>d.demographics.includes(x)))&&(outs.length===0||outs.some(x=>d.outcomes.includes(x)))&&(!q||[d.title,d.stat,d.why,d.family,d.sourceLabel,d.sourceText,d.primaryEvidence,d.methodology].join(' ').toLowerCase().includes(q)));}
+function redraw(){const f=filtered().sort((a,b)=>a.rank-b.rank); const trace={type:'bar',orientation:'h',y:f.map(d=>d.title),x:f.map(()=>1),customdata:f.map(d=>d.id),marker:{color:f.map(d=>selectedIds.has(d.id)?'#ECBA69':'#1D4331')},hovertemplate:'<b>%{y}</b><extra></extra>'}; Plotly.newPlot('chart',[trace],{margin:{l:260,r:20,t:18,b:30},paper_bgcolor:'#fff',plot_bgcolor:'#fff',xaxis:{visible:false,fixedrange:true},yaxis:{autorange:'reversed',fixedrange:true},title:'Select one or more evidence points'}, {displayModeBar:false}); buildEvidenceGrid(f);}
+function buildEvidenceGrid(list){document.getElementById('evidenceGrid').innerHTML=list.map(d=>`<article class='evidence-card' onclick="populateSelectedEvidence('${d.id}')"><div class='tag'>${d.outcomes[0]}</div>${d.demographics[0]?`<div class='tag'>${d.demographics[0]}</div>`:''}<h3>${d.title}</h3><div class='metric'>${d.stat}</div><div class='source'>Click to add to Why AP Is Needed</div></article>`).join('');}
+function openModal(id){const d=data.find(x=>x.id===id); document.getElementById('modalTitle').textContent=d.title; document.getElementById('modalStat').textContent=d.stat; document.getElementById('modalWhy').textContent=d.why; document.getElementById('modalFamily').textContent=d.family; document.getElementById('modalSourceText').textContent=d.sourceText; document.getElementById('modalPrimary').innerHTML=`<a href='${d.sourceUrl}' target='_blank' rel='noopener noreferrer'>Open linked primary evidence</a><div class='small' style='margin-top:6px;'>${d.primaryEvidence}</div>`; document.getElementById('modalMethod').textContent=d.methodology; document.getElementById('modalSource').innerHTML=`${d.sourceLabel}. ${d.sourceDate}. <span class='linklist'><a href='${d.sourceUrl}' target='_blank' rel='noopener noreferrer'>Source link</a></span>`; document.getElementById('modalTags').innerHTML=`${d.outcomes.map(t=>`<span class='tag'>${t}</span>`).join('')}${d.demographics.map(t=>`<span class='tag'>${t}</span>`).join('')}`; const m=document.getElementById('modal'); m.classList.add('show'); m.setAttribute('aria-hidden','false');}
+function closeModal(){const m=document.getElementById('modal'); m.classList.remove('show'); m.setAttribute('aria-hidden','true');}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal') closeModal();}); document.addEventListener('keydown',e=>{if(e.key==='Escape') closeModal();});
+function populateSelectedEvidence(id){const d=data.find(x=>x.id===id); document.getElementById('narrative').value=`${d.title}: ${d.stat}. ${d.why} ${d.family} Source: ${d.sourceLabel}, ${d.sourceDate}.`; selectedIds.add(id); redraw();}
+function generateNarrative(){let selected=data.filter(d=>selectedIds.has(d.id)); if(selected.length===0) selected=filtered().slice(0,3); selected=[...selected].sort((a,b)=>a.rank-b.rank); const paragraph=`Anchored Pathways is needed because the selected evidence points show that Texas families still face major barriers in college access, affordability, transfer, and completion. The data include ${selected.map(d=>d.stat).join('; ')}, with clear implications for ${[...new Set(selected.flatMap(d=>d.demographics))].join(', ')} students and families. Together, these findings show why family-centered navigation is important: it helps students understand applications, financial aid, transfer choices, and the steps that lead to a credential. A source-linked, plain-language support model makes the current data easier for families, partners, and funders to understand and use.`; document.getElementById('narrative').value=paragraph;}
+function copyNarrative(){const t=document.getElementById('narrative'); t.select(); document.execCommand('copy');}
 redraw();
 </script>
 </body>
